@@ -193,10 +193,19 @@ public interface IMusicManager extends IManager {
 	/**
 	 * Insert a song in the current playlist.
 	 * @param response Response object
-	 * @param album Song to add
+	 * @param song Song to add
 	 * @param position Where to insert the song
 	 */
 	public void insertIntoPlaylist(final DataResponse<Boolean> response, final Song song, final int position, final Context context);
+
+	/**
+	 * Move a song in the current playlist.
+	 * @param response Response object
+	 * @param from initial position
+	 * @param to target position
+	 * @param position Where to insert the song
+	 */
+	public void PlaylistMove(final DataResponse<Boolean> response, final int from, final int to, final Context context);
 
 	/**
 	 * Plays an album

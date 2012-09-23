@@ -1078,4 +1078,9 @@ public class MusicClient extends Client implements IMusicClient {
 		// TODO Not yet implemented
 		return false;
 	}
+
+	public boolean playlistMove(INotifiableManager manager, int from, int to) {
+		// TODO Not yet implemented
+		return false;
+	}
 }

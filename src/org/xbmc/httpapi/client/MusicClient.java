@@ -118,9 +118,18 @@ public class MusicClient extends Client implements IMusicClient {
 	 * @return True on success, false otherwise.
 	 */
 	public boolean addToPlaylist(INotifiableManager manager, Song song) {
-		return mConnection.getBoolean(manager, "AddToPlayList", song.path + ";" + PLAYLIST_ID);
+		return addToPlaylist(manager, song.path);
 	}
-	
+
+	/**
+	 * Adds a song to the current playlist.
+	 * @param path Full path to song to add
+	 * @return True on success, false otherwise.
+	 */
+	public boolean addToPlaylist(INotifiableManager manager, String path) {
+		return mConnection.getBoolean(manager, "AddToPlayList", path + ";" + PLAYLIST_ID);
+	}
+
 	/**
 	 * Returns how many items are in the playlist.
 	 * @return Number of items in the playlist
@@ -166,6 +175,17 @@ public class MusicClient extends Client implements IMusicClient {
 	
 	/**
 	 * Insert a song in the current playlist.
+	 * @see insertIntoPlaylist(INotifiableManager manager, String path, int position)
+	 * @param song Song to add
+	 * @param position Where to insert the song
+	 * @return True on success, false otherwise.
+	 */
+	public boolean insertIntoPlaylist(INotifiableManager manager, Song song, int position) {
+		return insertIntoPlaylist(manager, song.path, position);
+	}
+	
+	/**
+	 * Insert a song in the current playlist.
 	 * Since HTTP API don't allow insert, we have to remove all items from
 	 * the given position, add our song and add again all removed item.
 	 * Moreover, we can't remove the played item, so the position have to
@@ -174,7 +194,7 @@ public class MusicClient extends Client implements IMusicClient {
 	 * @param position Where to insert the song
 	 * @return True on success, false otherwise.
 	 */
-	public boolean insertIntoPlaylist(INotifiableManager manager, Song song, int position) {
+	public boolean insertIntoPlaylist(INotifiableManager manager, String path, int position) {
 		if (getPlaylistPosition(manager) >= position) return false;
 
 		final ArrayList<String> content = getPlaylist(manager);
@@ -185,18 +205,45 @@ public class MusicClient extends Client implements IMusicClient {
 			}
 		}
 		
-		if (addToPlaylist(manager, song) == false) {
+		if (addToPlaylist(manager, path) == false) {
 			return false;
 		}
 		
 		for (int current = position; current < content.size(); current++) {
-			if (mConnection.getBoolean(manager, "AddToPlayList", content.get(current) + ";" + PLAYLIST_ID) == false) {
+			if (addToPlaylist(manager, content.get(current)) == false) {
 				return false;
 			}
 		}
-			
 		return true;
 	}
+	
+	
+	/**
+	 * Move a song in the current playlist.
+	 * The implementation is a remove/insert.
+	 * HTTP API don't allow to remove the played song (from can't be the played song).
+	 * See also insertIntoPlaylist for other constraints.
+	 * @param from initial position
+	 * @param to target position
+	 * @return True on success, false otherwise.
+	 */
+	public boolean playlistMove(INotifiableManager manager, int from, int to) {
+		if (to == from) return true;
+		
+		int playPosition = getPlaylistPosition(manager);
+		if (from == playPosition) return false;
+		
+		final ArrayList<String> content = getPlaylist(manager);
+		if (from >= content.size()) return false;
+		final String path = content.get(from);
+		
+		if (removeFromPlaylist(manager, from) == false) return false;
+		
+		if (to > from) to--;  // We have removed from
+		
+		return insertIntoPlaylist(manager, path, to);
+	}
+		
 
 	/**
 	 * Returns the first {@link PLAYLIST_LIMIT} songs of the playlist. 

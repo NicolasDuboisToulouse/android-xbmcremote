@@ -130,6 +130,14 @@ public interface IMusicClient extends IClient {
 	public boolean insertIntoPlaylist(INotifiableManager manager, Song song, int position);
 	
 	/**
+	 * Move a song in the current playlist.
+	 * @param from initial position
+	 * @param to target position
+	 * @return True on success, false otherwise.
+	 */
+	public boolean playlistMove(INotifiableManager manager, int from, int to);
+
+	/**
 	 * Returns the first {@link PLAYLIST_LIMIT} songs of the playlist. 
 	 * @return Songs in the playlist.
 	 */
