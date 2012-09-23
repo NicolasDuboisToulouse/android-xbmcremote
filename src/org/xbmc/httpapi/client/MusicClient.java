@@ -26,8 +26,8 @@ import java.util.HashMap;
 
 import org.xbmc.api.business.INotifiableManager;
 import org.xbmc.api.data.IControlClient;
-import org.xbmc.api.data.IMusicClient;
 import org.xbmc.api.data.IControlClient.ICurrentlyPlaying;
+import org.xbmc.api.data.IMusicClient;
 import org.xbmc.api.info.PlayStatus;
 import org.xbmc.api.object.Album;
 import org.xbmc.api.object.Artist;
@@ -164,6 +164,40 @@ public class MusicClient extends Client implements IMusicClient {
 		return mConnection.getBoolean(manager, "RemoveFromPlaylist", path + ";" + PLAYLIST_ID);
 	}
 	
+	/**
+	 * Insert a song in the current playlist.
+	 * Since HTTP API don't allow insert, we have to remove all items from
+	 * the given position, add our song and add again all removed item.
+	 * Moreover, we can't remove the played item, so the position have to
+	 * be greater than the played item position.
+	 * @param song Song to add
+	 * @param position Where to insert the song
+	 * @return True on success, false otherwise.
+	 */
+	public boolean insertIntoPlaylist(INotifiableManager manager, Song song, int position) {
+		if (getPlaylistPosition(manager) >= position) return false;
+
+		final ArrayList<String> content = getPlaylist(manager);
+		
+		for (int count = position; count < content.size(); count++) {
+			if (removeFromPlaylist(manager, position) == false) {
+				return false;
+			}
+		}
+		
+		if (addToPlaylist(manager, song) == false) {
+			return false;
+		}
+		
+		for (int current = position; current < content.size(); current++) {
+			if (mConnection.getBoolean(manager, "AddToPlayList", content.get(current) + ";" + PLAYLIST_ID) == false) {
+				return false;
+			}
+		}
+			
+		return true;
+	}
+
 	/**
 	 * Returns the first {@link PLAYLIST_LIMIT} songs of the playlist. 
 	 * @return Songs in the playlist.

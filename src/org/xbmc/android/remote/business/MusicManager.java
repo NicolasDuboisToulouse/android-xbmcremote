@@ -446,6 +446,22 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 	}
 	
 	/**
+	 * Insert a song in the current playlist.
+	 * @param response Response object
+	 * @param album Song to add
+	 * @param position Where to insert the song
+	 */
+	public void insertIntoPlaylist(final DataResponse<Boolean> response, final Song song, final int position, final Context context) {
+		mHandler.post(new Command<Boolean>(response, this) {
+			public void doRun() throws Exception{ 
+				response.value = music(context).insertIntoPlaylist(MusicManager.this, song, position);
+						
+			}
+		});		
+	}
+
+	
+	/**
 	 * Plays an album
 	 * @param response Response object
 	 * @param album Album to play

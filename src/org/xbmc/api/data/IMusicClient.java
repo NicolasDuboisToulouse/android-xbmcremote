@@ -122,6 +122,14 @@ public interface IMusicClient extends IClient {
 	public boolean removeFromPlaylist(INotifiableManager manager, String path);
 	
 	/**
+	 * Insert a song in the current playlist.
+	 * @param song Song to add
+	 * @param position Where to insert the song
+	 * @return True on success, false otherwise.
+	 */
+	public boolean insertIntoPlaylist(INotifiableManager manager, Song song, int position);
+	
+	/**
 	 * Returns the first {@link PLAYLIST_LIMIT} songs of the playlist. 
 	 * @return Songs in the playlist.
 	 */
