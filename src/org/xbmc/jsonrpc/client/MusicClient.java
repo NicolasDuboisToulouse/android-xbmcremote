@@ -1083,4 +1083,21 @@ public class MusicClient extends Client implements IMusicClient {
 		// TODO Not yet implemented
 		return false;
 	}
+
+	public int getPlaylistMagicPosition(INotifiableManager musicManager) {
+		// TODO Auto-generated method stub
+		int pos = getPlaylistPosition(musicManager);
+		return (pos < 0)? 0: pos;
+	}
+
+	public boolean setPlaylistMagicPosition(INotifiableManager musicManager,
+			int position) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public boolean resetPlaylistMagicPosition(INotifiableManager musicManager) {
+		// TODO Auto-generated method stub
+		return true;
+	}
 }

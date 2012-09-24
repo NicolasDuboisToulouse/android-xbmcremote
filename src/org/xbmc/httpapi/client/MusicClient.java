@@ -58,6 +58,8 @@ public class MusicClient extends Client implements IMusicClient {
 	
 	public static final int PLAYLIST_LIMIT = 100;
 	
+	private int mplaylistMagicPosition = 0;
+	
 	/**
 	 * Class constructor needs reference to HTTP client connection
 	 * @param connection
@@ -155,6 +157,48 @@ public class MusicClient extends Client implements IMusicClient {
 		return mConnection.getBoolean(manager, "SetPlaylistSong", String.valueOf(position));
 	}
 	
+	/**
+	 * Returns the position of the "MAGIC" pointer.
+	 * The return value is always greater or equal to the playlist position.
+	 * This function will never return an invalid index (0 <= magic < playlist_size)
+	 * @param response Response object
+	 */
+	public int getPlaylistMagicPosition(INotifiableManager musicManager) {
+		int playlistPosition = getPlaylistPosition(musicManager);
+		
+		if (mplaylistMagicPosition < playlistPosition ||
+			mplaylistMagicPosition >= getPlaylistSize(musicManager)) {
+			mplaylistMagicPosition = playlistPosition;
+		}
+		
+		return mplaylistMagicPosition;
+	}
+
+	/**
+	 * Set the position of the "MAGIC" pointer.
+	 * @param position New position of the magic pointer (constraint: playlistPos <= magic < playlist_size)
+	 * @param response Response object
+	 */
+	public boolean setPlaylistMagicPosition(INotifiableManager musicManager,
+			int position) {
+		if (position < 0) return false;
+		if (position < getPlaylistPosition(musicManager)) return false;
+		if (position >= getPlaylistSize(musicManager)) return false;
+
+		mplaylistMagicPosition = position;
+		return true;
+	}
+	
+	/**
+	 * Reset the "MAGIC" pointer to its default value.
+	 * The pointer will follow again the playlist position.
+	 * @param response Response object
+	 */
+	public boolean resetPlaylistMagicPosition(INotifiableManager musicManager) {
+		mplaylistMagicPosition = 0;
+		return true;
+	}
+
 	/**
 	 * Removes media from the current playlist. It is not possible to remove the media if it is currently being played.
 	 * @param position Position to remove, starting with 0.
@@ -294,6 +338,7 @@ public class MusicClient extends Client implements IMusicClient {
 	 * @return True on success, false otherwise.
 	 */
 	public boolean clearPlaylist(INotifiableManager manager) {
+		resetPlaylistMagicPosition(manager);
 		return mConnection.getBoolean(manager, "ClearPlayList", PLAYLIST_ID);
 	}
 	

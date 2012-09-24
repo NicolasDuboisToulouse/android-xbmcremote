@@ -108,6 +108,28 @@ public interface IMusicClient extends IClient {
 	public boolean setPlaylistPosition(INotifiableManager manager, int position);
 	
 	/**
+	 * Returns the position of the "MAGIC" pointer.
+	 * The return value is always greater or equal to the playlist position.
+	 * This function will never return an invalid index (0 <= magic < playlist_size)
+	 * @param response Response object
+	 */
+	public int getPlaylistMagicPosition(INotifiableManager musicManager);
+
+	/**
+	 * Set the position of the "MAGIC" pointer.
+	 * @param position New position of the magic pointer (constraint: playlistPos <= magic < playlist_size)
+	 * @param response Response object
+	 */
+	public boolean setPlaylistMagicPosition(INotifiableManager musicManager, int position);
+
+	/**
+	 * Reset the "MAGIC" pointer to its default value.
+	 * The pointer will follow again the playlist position.
+	 * @param response Response object
+	 */
+	public boolean resetPlaylistMagicPosition(INotifiableManager musicManager);
+
+	/**
 	 * Removes media from the current playlist. It is not possible to remove the media if it is currently being played.
 	 * @param position Position to remove, starting with 0.
 	 * @return True on success, false otherwise.

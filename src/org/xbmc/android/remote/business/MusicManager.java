@@ -467,7 +467,7 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 	 * @param to target position
 	 * @param position Where to insert the song
 	 */
-	public void PlaylistMove(final DataResponse<Boolean> response, final int from, final int to, final Context context) {
+	public void playlistMove(final DataResponse<Boolean> response, final int from, final int to, final Context context) {
 		mHandler.post(new Command<Boolean>(response, this) {
 			public void doRun() throws Exception{ 
 				response.value = music(context).playlistMove(MusicManager.this, from, to);
@@ -622,6 +622,51 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 	}
 	
 	/**
+	 * Returns the position of the "MAGIC" pointer.
+	 * The return value is always greater or equal to the playlist position.
+	 * This function will never return an invalid index (0 <= magic < playlist_size)
+	 * @param response Response object
+	 */
+	public void getPlaylistMagicPosition(final DataResponse<Integer> response,
+			final Context context) {
+		mHandler.post(new Command<Integer>(response, this) {
+			public void doRun() throws Exception{ 
+				response.value = music(context).getPlaylistMagicPosition(MusicManager.this);
+			}
+		});
+	}
+
+	/**
+	 * Set the position of the "MAGIC" pointer.
+	 * @param position New position of the magic pointer (constraint: playlistPos <= magic < playlist_size)
+	 * @param response Response object
+	 */
+	public void setPlaylistMagicPosition(final DataResponse<Boolean> response,
+			final int position, final Context context) {
+		mHandler.post(new Command<Boolean>(response, this) {
+			public void doRun() throws Exception{ 
+				response.value = music(context).setPlaylistMagicPosition(MusicManager.this, position);
+			}
+		});
+	}
+	
+	/**
+	 * Reset the "MAGIC" pointer to its default value.
+	 * The pointer will follow again the playlist position.
+	 * @param response Response object
+	 */
+	public void resetPlaylistMagicPosition(final DataResponse<Boolean> response, final Context context)
+	{
+		mHandler.post(new Command<Boolean>(response, this) {
+			public void doRun() throws Exception{ 
+				response.value = music(context).resetPlaylistMagicPosition(MusicManager.this);
+			}
+		});		
+	}
+
+
+	
+	/**
 	 * Updates the album object with additional data from the albuminfo table
 	 * @param response Response object
 	 * @param album Album to update
@@ -668,7 +713,6 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 	}
 
 	public void onWrongConnectionState(int state) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub		
 	}
 }

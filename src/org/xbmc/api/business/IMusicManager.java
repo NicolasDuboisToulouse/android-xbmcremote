@@ -205,7 +205,7 @@ public interface IMusicManager extends IManager {
 	 * @param to target position
 	 * @param position Where to insert the song
 	 */
-	public void PlaylistMove(final DataResponse<Boolean> response, final int from, final int to, final Context context);
+	public void playlistMove(final DataResponse<Boolean> response, final int from, final int to, final Context context);
 
 	/**
 	 * Plays an album
@@ -268,6 +268,29 @@ public interface IMusicManager extends IManager {
 	 * @param response Response object
 	 */
 	public void getPlaylistPosition(final DataResponse<Integer> response, final Context context);
+	
+	/**
+	 * Returns the position of the "MAGIC" pointer.
+	 * The return value is always greater or equal to the playlist position.
+	 * (The magic pointer follow the playlist position.)
+	 * This function will never return an invalid index (0 <= magic < playlist_size)
+	 * @param response Response object
+	 */
+	public void getPlaylistMagicPosition(final DataResponse<Integer> response, final Context context);
+
+	/**
+	 * Set the position of the "MAGIC" pointer.
+	 * @param position New position of the magic pointer (constraint: playlistPos <= magic < playlist_size)
+	 * @param response Response object
+	 */
+	public void setPlaylistMagicPosition(final DataResponse<Boolean> response, int position, final Context context);
+	
+	/**
+	 * Reset the "MAGIC" pointer to its default value.
+	 * The pointer will follow again the playlist position.
+	 * @param response Response object
+	 */
+	public void resetPlaylistMagicPosition(final DataResponse<Boolean> response, final Context context);
 	
 	/**
 	 * Updates the album object with additional data from the albuminfo table
