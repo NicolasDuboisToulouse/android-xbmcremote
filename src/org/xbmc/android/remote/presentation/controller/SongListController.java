@@ -233,6 +233,11 @@ public class SongListController extends ListController implements IController {
 								"Magic insert fail!"), song, mActivity.getApplicationContext());
 				break;
 				
+			case ITEM_CONTEXT_MAGIC_RESET:
+				mMusicManager.magicPlaylistReset(new QueryResponse(mActivity,
+						"Next magic insert after the playing song.",
+						"Magic reset fail!"), mActivity.getApplicationContext());
+				break;
 			default:
 				return;
 		}
