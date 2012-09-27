@@ -107,27 +107,24 @@ public interface IMusicClient extends IClient {
 	 */
 	public boolean setPlaylistPosition(INotifiableManager manager, int position);
 	
-	/**
-	 * Returns the position of the "MAGIC" pointer.
-	 * The return value is always greater or equal to the playlist position.
-	 * This function will never return an invalid index (0 <= magic < playlist_size)
-	 * @param response Response object
-	 */
-	public int getPlaylistMagicPosition(INotifiableManager musicManager);
 
 	/**
-	 * Set the position of the "MAGIC" pointer.
-	 * @param position New position of the magic pointer (constraint: playlistPos <= magic < playlist_size)
+	 * "MAGIC" insert a song.
+	 * The first time you use this function, the song is inserted after the playing song.
+	 * Next times, song are inserted after the last "MAGIC" inserted song.
+	 * The inserted position will never be before the played song. That mean, if the last song
+	 * "MAGIC" inserted is before the playing song, the current song will be inserted after the playing song.
 	 * @param response Response object
+	 * @param song Song to insert
 	 */
-	public boolean setPlaylistMagicPosition(INotifiableManager musicManager, int position);
+	public boolean magicPlaylistInsert(INotifiableManager musicManager, final Song song);
 
 	/**
-	 * Reset the "MAGIC" pointer to its default value.
-	 * The pointer will follow again the playlist position.
+	 * Reset the "MAGIC" function.
+	 * The next time you call magicPlaylistInsert, the song will be inserted after the playing song.
 	 * @param response Response object
 	 */
-	public boolean resetPlaylistMagicPosition(INotifiableManager musicManager);
+	public boolean magicPlaylistReset(INotifiableManager musicManager);
 
 	/**
 	 * Removes media from the current playlist. It is not possible to remove the media if it is currently being played.

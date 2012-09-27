@@ -621,45 +621,36 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 		});
 	}
 	
+
 	/**
-	 * Returns the position of the "MAGIC" pointer.
-	 * The return value is always greater or equal to the playlist position.
-	 * This function will never return an invalid index (0 <= magic < playlist_size)
+	 * "MAGIC" insert a song.
+	 * The first time you use this function, the song is inserted after the playing song.
+	 * Next times, song are inserted after the last "MAGIC" inserted song.
+	 * The inserted position will never be before the played song. That mean, if the last song
+	 * "MAGIC" inserted is before the playing song, the current song will be inserted after the playing song.
 	 * @param response Response object
+	 * @param song Song to insert
 	 */
-	public void getPlaylistMagicPosition(final DataResponse<Integer> response,
-			final Context context) {
-		mHandler.post(new Command<Integer>(response, this) {
+	public void magicPlaylistInsert(final DataResponse<Boolean> response, final Song song, final Context context)
+	{
+		mHandler.post(new Command<Boolean>(response, this) {
 			public void doRun() throws Exception{ 
-				response.value = music(context).getPlaylistMagicPosition(MusicManager.this);
+				response.value = music(context).magicPlaylistInsert(MusicManager.this, song);
+				checkForPlayAfterQueue(music(context), control(context), 0);
 			}
 		});
 	}
 
 	/**
-	 * Set the position of the "MAGIC" pointer.
-	 * @param position New position of the magic pointer (constraint: playlistPos <= magic < playlist_size)
+	 * Reset the "MAGIC" function.
+	 * The next time you call magicPlaylistInsert, the song will be inserted after the playing song.
 	 * @param response Response object
 	 */
-	public void setPlaylistMagicPosition(final DataResponse<Boolean> response,
-			final int position, final Context context) {
-		mHandler.post(new Command<Boolean>(response, this) {
-			public void doRun() throws Exception{ 
-				response.value = music(context).setPlaylistMagicPosition(MusicManager.this, position);
-			}
-		});
-	}
-	
-	/**
-	 * Reset the "MAGIC" pointer to its default value.
-	 * The pointer will follow again the playlist position.
-	 * @param response Response object
-	 */
-	public void resetPlaylistMagicPosition(final DataResponse<Boolean> response, final Context context)
+	public void magicPlaylistReset(final DataResponse<Boolean> response, final Context context)
 	{
 		mHandler.post(new Command<Boolean>(response, this) {
 			public void doRun() throws Exception{ 
-				response.value = music(context).resetPlaylistMagicPosition(MusicManager.this);
+				response.value = music(context).magicPlaylistReset(MusicManager.this);
 			}
 		});		
 	}

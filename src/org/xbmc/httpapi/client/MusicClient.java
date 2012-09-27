@@ -157,44 +157,43 @@ public class MusicClient extends Client implements IMusicClient {
 		return mConnection.getBoolean(manager, "SetPlaylistSong", String.valueOf(position));
 	}
 	
+
 	/**
-	 * Returns the position of the "MAGIC" pointer.
-	 * The return value is always greater or equal to the playlist position.
-	 * This function will never return an invalid index (0 <= magic < playlist_size)
+	 * "MAGIC" insert a song.
+	 * The first time you use this function, the song is inserted after the playing song.
+	 * Next times, song are inserted after the last "MAGIC" inserted song.
+	 * The inserted position will never be before the played song. That mean, if the last song
+	 * "MAGIC" inserted is before the playing song, the current song will be inserted after the playing song.
 	 * @param response Response object
+	 * @param song Song to insert
 	 */
-	public int getPlaylistMagicPosition(INotifiableManager musicManager) {
-		int playlistPosition = getPlaylistPosition(musicManager);
-		
-		if (mplaylistMagicPosition < playlistPosition ||
-			mplaylistMagicPosition >= getPlaylistSize(musicManager)) {
-			mplaylistMagicPosition = playlistPosition;
+	public boolean magicPlaylistInsert(INotifiableManager musicManager, final Song song)
+	{
+		// Update the magic pointer
+		int playlistPosition = getPlaylistPosition(musicManager);	
+		if (mplaylistMagicPosition <= playlistPosition ||
+			mplaylistMagicPosition > getPlaylistSize(musicManager)) {
+			mplaylistMagicPosition = playlistPosition + 1;
 		}
 		
-		return mplaylistMagicPosition;
-	}
-
-	/**
-	 * Set the position of the "MAGIC" pointer.
-	 * @param position New position of the magic pointer (constraint: playlistPos <= magic < playlist_size)
-	 * @param response Response object
-	 */
-	public boolean setPlaylistMagicPosition(INotifiableManager musicManager,
-			int position) {
-		if (position < 0) return false;
-		if (position < getPlaylistPosition(musicManager)) return false;
-		if (position >= getPlaylistSize(musicManager)) return false;
-
-		mplaylistMagicPosition = position;
+		// Insert the song
+		if (insertIntoPlaylist(musicManager, song, mplaylistMagicPosition) == false) {
+			return false;
+		}
+		
+		// Set magic pointer to the inserted song
+		mplaylistMagicPosition++;
+		
 		return true;
 	}
-	
+
 	/**
-	 * Reset the "MAGIC" pointer to its default value.
-	 * The pointer will follow again the playlist position.
+	 * Reset the "MAGIC" function.
+	 * The next time you call magicPlaylistInsert, the song will be inserted after the playing song.
 	 * @param response Response object
 	 */
-	public boolean resetPlaylistMagicPosition(INotifiableManager musicManager) {
+	public boolean magicPlaylistReset(INotifiableManager musicManager)
+	{
 		mplaylistMagicPosition = 0;
 		return true;
 	}
@@ -294,43 +293,12 @@ public class MusicClient extends Client implements IMusicClient {
 	 * @return Songs in the playlist.
 	 */
 	public ArrayList<String> getPlaylist(INotifiableManager manager) {
-		return mConnection.getArray(manager, "GetPlaylistContents", PLAYLIST_ID);
-		
-		
-		/*
-		final ArrayList<String> nodes = mConnection.getArray("GetDirectory", "playlistmusic://");
-		final ArrayList<String> ids = new ArrayList<String>();
-		final int playlistPosition = getPlaylistPosition();
-		int i = 0;
-		for (String node : nodes) {
-			ids.add(node.substring(node.lastIndexOf('/') + 1, node.lastIndexOf('.')));
-			if (++i > PLAYLIST_LIMIT + playlistPosition) {
-				break;
-			}
+		ArrayList<String> list = mConnection.getArray(manager, "GetPlaylistContents", PLAYLIST_ID);
+		final String firstEntry = list.get(0);
+		if (firstEntry != null && firstEntry.equals("[Empty]")) {
+			list = new ArrayList<String>();
 		}
-		StringBuilder sql = new StringBuilder();
-		sql.append("idSong IN (");
-		int j = 0;
-		for (String id : ids) {
-			sql.append(id);
-			if (++j < i) {
-				sql.append(',');
-			}
-		}
-		sql.append(")");
-		final HashMap<Integer, Song> unsortedSongs = getSongsAsHashMap(sql);
-		final ArrayList<Song> sortedSongs = new ArrayList<Song>();
-		
-		for (String node : nodes) {
-			try {
-				final int id = Integer.parseInt(node.substring(node.lastIndexOf('/') + 1, node.lastIndexOf('.')));
-				sortedSongs.add(unsortedSongs.get(id));
-			} catch (NumberFormatException e) { 
-				Log.e(TAG, e.getMessage());
-				e.printStackTrace();
-			}
-		}
-		return sortedSongs;*/
+		return list;
 	}
 	
 	/**
@@ -338,7 +306,7 @@ public class MusicClient extends Client implements IMusicClient {
 	 * @return True on success, false otherwise.
 	 */
 	public boolean clearPlaylist(INotifiableManager manager) {
-		resetPlaylistMagicPosition(manager);
+		magicPlaylistReset(manager);
 		return mConnection.getBoolean(manager, "ClearPlayList", PLAYLIST_ID);
 	}
 	

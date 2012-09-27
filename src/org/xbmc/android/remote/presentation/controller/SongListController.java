@@ -63,7 +63,8 @@ public class SongListController extends ListController implements IController {
 	private static final int mThumbSize = ThumbSize.SMALL;
 	public static final int ITEM_CONTEXT_QUEUE = 1;
 	public static final int ITEM_CONTEXT_PLAY = 2;
-	public static final int ITEM_CONTEXT_INFO = 3;
+	public static final int ITEM_CONTEXT_MAGIC_INSERT = 3;
+	public static final int ITEM_CONTEXT_MAGIC_RESET = 4;
 	
 	public static final int MENU_PLAY_ALL = 1;
 	public static final int MENU_SORT = 2;
@@ -193,6 +194,8 @@ public class SongListController extends ListController implements IController {
 		menu.setHeaderTitle(((Song)mList.getItemAtPosition(view.getPosition())).title);
 		menu.add(0, ITEM_CONTEXT_QUEUE, 1, "Queue Song");
 		menu.add(0, ITEM_CONTEXT_PLAY, 2, "Play Song");
+		menu.add(0, ITEM_CONTEXT_MAGIC_INSERT, 3, "Magic insert song");
+		menu.add(0, ITEM_CONTEXT_MAGIC_RESET, 4, "Magic reset");
 	}
 	
 	public void onContextItemSelected(MenuItem item) {
@@ -223,6 +226,13 @@ public class SongListController extends ListController implements IController {
 					), mAlbum, song, mActivity.getApplicationContext());
 				}
 				break;
+				
+			case ITEM_CONTEXT_MAGIC_INSERT:
+				mMusicManager.magicPlaylistInsert(new QueryResponse(mActivity,
+								"Song inserted.",
+								"Magic insert fail!"), song, mActivity.getApplicationContext());
+				break;
+				
 			default:
 				return;
 		}
