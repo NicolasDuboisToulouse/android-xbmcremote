@@ -623,39 +623,17 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 	
 
 	/**
-	 * "MAGIC" insert a song.
-	 * The first time you use this function, the song is inserted after the playing song.
-	 * Next times, song are inserted after the last "MAGIC" inserted song.
-	 * The inserted position will never be before the played song. That mean, if the last song
-	 * "MAGIC" inserted is before the playing song, the current song will be inserted after the playing song.
-	 * @param response Response object
-	 * @param song Song to insert
+	 * @see IMusicManager#playlistZenPlay(DataResponse, Song, boolean, Context)
 	 */
-	public void magicPlaylistInsert(final DataResponse<Boolean> response, final Song song, final Context context)
+	public void playlistZenPlay(final DataResponse<Boolean> response, final Song song, final boolean reset, final Context context)
 	{
 		mHandler.post(new Command<Boolean>(response, this) {
 			public void doRun() throws Exception{ 
-				response.value = music(context).magicPlaylistInsert(MusicManager.this, song);
+				response.value = music(context).playlistZenPlay(MusicManager.this, song, reset);
 				checkForPlayAfterQueue(music(context), control(context), 0);
 			}
 		});
 	}
-
-	/**
-	 * Reset the "MAGIC" function.
-	 * The next time you call magicPlaylistInsert, the song will be inserted after the playing song.
-	 * @param response Response object
-	 */
-	public void magicPlaylistReset(final DataResponse<Boolean> response, final Context context)
-	{
-		mHandler.post(new Command<Boolean>(response, this) {
-			public void doRun() throws Exception{ 
-				response.value = music(context).magicPlaylistReset(MusicManager.this);
-			}
-		});		
-	}
-
-
 	
 	/**
 	 * Updates the album object with additional data from the albuminfo table

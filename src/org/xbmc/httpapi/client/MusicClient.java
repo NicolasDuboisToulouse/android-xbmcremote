@@ -24,6 +24,8 @@ package org.xbmc.httpapi.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.xbmc.api.business.DataResponse;
+import org.xbmc.api.business.IMusicManager;
 import org.xbmc.api.business.INotifiableManager;
 import org.xbmc.api.data.IControlClient;
 import org.xbmc.api.data.IControlClient.ICurrentlyPlaying;
@@ -39,6 +41,7 @@ import org.xbmc.api.type.MediaType;
 import org.xbmc.api.type.SortType;
 import org.xbmc.httpapi.Connection;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 /**
@@ -58,7 +61,7 @@ public class MusicClient extends Client implements IMusicClient {
 	
 	public static final int PLAYLIST_LIMIT = 100;
 	
-	private int mplaylistMagicPosition = 0;
+	private int mPlaylistZenPlayPosition = 0;
 	
 	/**
 	 * Class constructor needs reference to HTTP client connection
@@ -159,42 +162,26 @@ public class MusicClient extends Client implements IMusicClient {
 	
 
 	/**
-	 * "MAGIC" insert a song.
-	 * The first time you use this function, the song is inserted after the playing song.
-	 * Next times, song are inserted after the last "MAGIC" inserted song.
-	 * The inserted position will never be before the played song. That mean, if the last song
-	 * "MAGIC" inserted is before the playing song, the current song will be inserted after the playing song.
-	 * @param response Response object
-	 * @param song Song to insert
+	 * @see IMusicManager#playlistZenPlay(DataResponse, Song, boolean, Context)
 	 */
-	public boolean magicPlaylistInsert(INotifiableManager musicManager, final Song song)
+	public boolean playlistZenPlay(INotifiableManager musicManager, final Song song, boolean reset)
 	{
-		// Update the magic pointer
+		// Update the ZenPlay pointer
 		int playlistPosition = getPlaylistPosition(musicManager);	
-		if (mplaylistMagicPosition <= playlistPosition ||
-			mplaylistMagicPosition > getPlaylistSize(musicManager)) {
-			mplaylistMagicPosition = playlistPosition + 1;
+		if (reset == true ||
+			mPlaylistZenPlayPosition <= playlistPosition ||
+			mPlaylistZenPlayPosition > getPlaylistSize(musicManager)) {
+			mPlaylistZenPlayPosition = playlistPosition + 1;
 		}
 		
 		// Insert the song
-		if (insertIntoPlaylist(musicManager, song, mplaylistMagicPosition) == false) {
+		if (insertIntoPlaylist(musicManager, song, mPlaylistZenPlayPosition) == false) {
 			return false;
 		}
 		
-		// Set magic pointer to the inserted song
-		mplaylistMagicPosition++;
+		// Set ZenPlay pointer after the inserted song
+		mPlaylistZenPlayPosition++;
 		
-		return true;
-	}
-
-	/**
-	 * Reset the "MAGIC" function.
-	 * The next time you call magicPlaylistInsert, the song will be inserted after the playing song.
-	 * @param response Response object
-	 */
-	public boolean magicPlaylistReset(INotifiableManager musicManager)
-	{
-		mplaylistMagicPosition = 0;
 		return true;
 	}
 
@@ -306,7 +293,7 @@ public class MusicClient extends Client implements IMusicClient {
 	 * @return True on success, false otherwise.
 	 */
 	public boolean clearPlaylist(INotifiableManager manager) {
-		magicPlaylistReset(manager);
+		mPlaylistZenPlayPosition = 0;
 		return mConnection.getBoolean(manager, "ClearPlayList", PLAYLIST_ID);
 	}
 	

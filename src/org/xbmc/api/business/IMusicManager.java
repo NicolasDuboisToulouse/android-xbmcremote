@@ -270,23 +270,20 @@ public interface IMusicManager extends IManager {
 	public void getPlaylistPosition(final DataResponse<Integer> response, final Context context);
 	
 	/**
-	 * "MAGIC" insert a song.
-	 * The first time you use this function, the song is inserted after the playing song.
-	 * Next times, song are inserted after the last "MAGIC" inserted song.
-	 * The inserted position will never be before the played song. That mean, if the last song
-	 * "MAGIC" inserted is before the playing song, the current song will be inserted after the playing song.
+	 * "ZenPlay" a song.
+	 * The first time you use this function, the song is inserted after the currently playing song.
+	 * Next times, song are inserted after the last "ZenPlay" song.
+	 * The inserted position will never be before the currently playing song. That mean, if the last
+	 * "ZenPlay" song is before the currently playing song, the new one will be inserted just after it.
+	 * If reset is set to true, the song will be inserted just after the currently playing song (reset 
+	 * the "ZenPlay" position).
+	 * the current playing song.
 	 * @param response Response object
 	 * @param song Song to insert
+	 * @param reset Set to true to reset the current ZenPlay queue
 	 */
-	public void magicPlaylistInsert(final DataResponse<Boolean> response, final Song song, final Context context);
+	public void playlistZenPlay(final DataResponse<Boolean> response, final Song song, final boolean reset, final Context context);
 	
-	/**
-	 * Reset the "MAGIC" function.
-	 * The next time you call magicPlaylistInsert, the song will be inserted after the playing song.
-	 * @param response Response object
-	 */
-	public void magicPlaylistReset(final DataResponse<Boolean> response, final Context context);
-
 	
 	/**
 	 * Updates the album object with additional data from the albuminfo table

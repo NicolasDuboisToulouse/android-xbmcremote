@@ -23,6 +23,8 @@ package org.xbmc.api.data;
 
 import java.util.ArrayList;
 
+import org.xbmc.api.business.DataResponse;
+import org.xbmc.api.business.IMusicManager;
 import org.xbmc.api.business.INotifiableManager;
 import org.xbmc.api.object.Album;
 import org.xbmc.api.object.Artist;
@@ -30,6 +32,7 @@ import org.xbmc.api.object.Genre;
 import org.xbmc.api.object.ICoverArt;
 import org.xbmc.api.object.Song;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 /**
@@ -109,22 +112,9 @@ public interface IMusicClient extends IClient {
 	
 
 	/**
-	 * "MAGIC" insert a song.
-	 * The first time you use this function, the song is inserted after the playing song.
-	 * Next times, song are inserted after the last "MAGIC" inserted song.
-	 * The inserted position will never be before the played song. That mean, if the last song
-	 * "MAGIC" inserted is before the playing song, the current song will be inserted after the playing song.
-	 * @param response Response object
-	 * @param song Song to insert
+	 * @see IMusicManager#playlistZenPlay(DataResponse, Song, boolean, Context)
 	 */
-	public boolean magicPlaylistInsert(INotifiableManager musicManager, final Song song);
-
-	/**
-	 * Reset the "MAGIC" function.
-	 * The next time you call magicPlaylistInsert, the song will be inserted after the playing song.
-	 * @param response Response object
-	 */
-	public boolean magicPlaylistReset(INotifiableManager musicManager);
+	public boolean playlistZenPlay(INotifiableManager musicManager, final Song song, final boolean reset);
 
 	/**
 	 * Removes media from the current playlist. It is not possible to remove the media if it is currently being played.

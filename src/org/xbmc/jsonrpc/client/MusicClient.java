@@ -1084,13 +1084,9 @@ public class MusicClient extends Client implements IMusicClient {
 		return false;
 	}
 
-	public boolean magicPlaylistInsert(INotifiableManager musicManager,
-			Song song) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public boolean magicPlaylistReset(INotifiableManager musicManager) {
+	public boolean playlistZenPlay(INotifiableManager musicManager,
+			Song song,
+			boolean reset) {
 		// TODO Auto-generated method stub
 		return false;
 	}
