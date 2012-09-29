@@ -175,7 +175,7 @@ public class MusicClient extends Client implements IMusicClient {
 		}
 		
 		// Insert the song
-		if (insertIntoPlaylist(musicManager, song, mPlaylistZenPlayPosition) == false) {
+		if (playlistInsert(musicManager, song, mPlaylistZenPlayPosition) == false) {
 			return false;
 		}
 		
@@ -236,7 +236,7 @@ public class MusicClient extends Client implements IMusicClient {
 	 * @param position Where to insert the song
 	 * @return True on success, false otherwise.
 	 */
-	public boolean insertIntoPlaylist(INotifiableManager manager, Song song, int position) {
+	public boolean playlistInsert(INotifiableManager manager, Song song, int position) {
 		return insertIntoPlaylist(manager, song.path, position);
 	}
 	

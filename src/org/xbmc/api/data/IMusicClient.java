@@ -141,7 +141,7 @@ public interface IMusicClient extends IClient {
 	 * @param position Where to insert the song
 	 * @return True on success, false otherwise.
 	 */
-	public boolean insertIntoPlaylist(INotifiableManager manager, Song song, int position);
+	public boolean playlistInsert(INotifiableManager manager, Song song, int position);
 	
 	/**
 	 * Move a song in the current playlist.

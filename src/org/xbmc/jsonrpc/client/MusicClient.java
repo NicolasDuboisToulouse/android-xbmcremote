@@ -1073,7 +1073,7 @@ public class MusicClient extends Client implements IMusicClient {
 		};
 	}
 
-	public boolean insertIntoPlaylist(INotifiableManager manager, Song song,
+	public boolean playlistInsert(INotifiableManager manager, Song song,
 			int position) {
 		// TODO Not yet implemented
 		return false;
