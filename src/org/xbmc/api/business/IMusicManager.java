@@ -286,6 +286,14 @@ public interface IMusicManager extends IManager {
 	
 	
 	/**
+	 * Move and "ZenPlay" a song.
+	 * Move a song in the playlist with the "ZenPlay" Functionality.
+	 * @see #playlistZenPlay(DataResponse, Song, boolean, Context)
+	 */
+	public void playlistMoveZenPlay(final DataResponse<Boolean> response, final int from, final boolean reset, final Context context);
+
+	
+	/**
 	 * Updates the album object with additional data from the albuminfo table
 	 * @param response Response object
 	 * @param album Album to update

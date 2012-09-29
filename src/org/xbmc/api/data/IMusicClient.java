@@ -117,6 +117,11 @@ public interface IMusicClient extends IClient {
 	public boolean playlistZenPlay(INotifiableManager musicManager, final Song song, final boolean reset);
 
 	/**
+	 * @see IMusicManager#playlistMoveZenPlay(DataResponse, int, int, boolean, Context)
+	 */
+	public boolean playlistMoveZenPlay(INotifiableManager musicManager, final int from, final boolean reset);
+
+	/**
 	 * Removes media from the current playlist. It is not possible to remove the media if it is currently being played.
 	 * @param position Position to remove, starting with 0.
 	 * @return True on success, false otherwise.

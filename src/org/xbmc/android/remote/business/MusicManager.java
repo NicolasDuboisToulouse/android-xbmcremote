@@ -636,6 +636,20 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 	}
 	
 	/**
+	 * @see IMusicManager#playlistMoveZenPlay(DataResponse, int, int, boolean, Context)
+	 */
+	public void playlistMoveZenPlay(final DataResponse<Boolean> response, final int from, final boolean reset, final Context context)
+	{
+		mHandler.post(new Command<Boolean>(response, this) {
+			public void doRun() throws Exception{ 
+				response.value = music(context).playlistMoveZenPlay(MusicManager.this, from, reset);
+				checkForPlayAfterQueue(music(context), control(context), 0);
+			}
+		});		
+	}
+
+	
+	/**
 	 * Updates the album object with additional data from the albuminfo table
 	 * @param response Response object
 	 * @param album Album to update

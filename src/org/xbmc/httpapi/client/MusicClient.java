@@ -186,6 +186,32 @@ public class MusicClient extends Client implements IMusicClient {
 	}
 
 	/**
+	 * @see IMusicManager#playlistMoveZenPlay(DataResponse, int, int, boolean, Context)
+	 * @see MusicClient#playlistMove(INotifiableManager, int, int)
+	 */
+	public boolean playlistMoveZenPlay(INotifiableManager musicManager,	int from, boolean reset) {
+		int playlistPosition = getPlaylistPosition(musicManager);
+		if (from <= playlistPosition) return false;  //We can't move a song before the played one. see playlistMove.
+
+		// Update the ZenPlay pointer
+		if (reset == true ||
+			mPlaylistZenPlayPosition <= playlistPosition ||
+			mPlaylistZenPlayPosition > getPlaylistSize(musicManager)) {
+			mPlaylistZenPlayPosition = playlistPosition + 1;
+		}
+		
+		// Move the song
+		if (playlistMove(musicManager, from, mPlaylistZenPlayPosition) == false) {
+			return false;
+		}
+		
+		// Set ZenPlay pointer after the moved song
+		mPlaylistZenPlayPosition++;
+		
+		return true;
+	}
+
+	/**
 	 * Removes media from the current playlist. It is not possible to remove the media if it is currently being played.
 	 * @param position Position to remove, starting with 0.
 	 * @return True on success, false otherwise.

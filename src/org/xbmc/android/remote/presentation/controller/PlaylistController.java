@@ -59,10 +59,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 public class PlaylistController extends ListController implements IController, Callback {
 	
@@ -72,7 +72,9 @@ public class PlaylistController extends ListController implements IController, C
 	
 	public static final int ITEM_CONTEXT_PLAY = 1;
 	public static final int ITEM_CONTEXT_REMOVE = 2;
-	
+	public static final int ITEM_CONTEXT_ZENPLAY = 3;
+	public static final int ITEM_CONTEXT_ZENPLAY_QUEUED = 4;
+
 	public static final int MESSAGE_PLAYLIST_SIZE = 701;
 	public static final String BUNDLE_PLAYLIST_SIZE = "playlist_size";
 	
@@ -147,7 +149,7 @@ public class PlaylistController extends ListController implements IController, C
 					mCurrentPosition = value;
 				}
 			}, mActivity.getApplicationContext());
-			
+            
 			mMusicManager.getPlaylist(new DataResponse<ArrayList<String>>() {
 	  	  		public void run() {
 	  	  			if (value.size() > 0) {
@@ -334,6 +336,10 @@ public class PlaylistController extends ListController implements IController, C
 		menu.setHeaderTitle(playlistItem.filename);
 		menu.add(0, ITEM_CONTEXT_PLAY, 1, "Play");
 		menu.add(0, ITEM_CONTEXT_REMOVE, 2, "Remove");
+		if (mPlayListId == MUSIC_PLAYLIST_ID) {
+			menu.add(0, ITEM_CONTEXT_ZENPLAY, 3, "ZenPlay song");
+			menu.add(0, ITEM_CONTEXT_ZENPLAY_QUEUED, 4, "ZenPlay queued song");
+		}
 	}
 	
 	public void onContextItemSelected(MenuItem item) {
@@ -374,6 +380,43 @@ public class PlaylistController extends ListController implements IController, C
 					break;
 				}
 				break;
+				
+			case ITEM_CONTEXT_ZENPLAY:
+				switch (mPlayListId) {
+				case MUSIC_PLAYLIST_ID:
+					mMusicManager.playlistMoveZenPlay(new DataResponse<Boolean>(){
+						public void run() {
+							if (value == false) {
+								Toast.makeText(mActivity.getApplicationContext(), "ZenPlay fail!", Toast.LENGTH_SHORT).show();
+							}
+							updatePlaylist();
+						}
+					}, playlistItem.position, true, mActivity.getApplicationContext());
+					break;
+					
+				default:
+					break;
+				}
+				break;
+				
+			case ITEM_CONTEXT_ZENPLAY_QUEUED:
+				switch (mPlayListId) {
+				case MUSIC_PLAYLIST_ID:
+					mMusicManager.playlistMoveZenPlay(new DataResponse<Boolean>(){
+						public void run() {
+							if (value == false) {
+								Toast.makeText(mActivity.getApplicationContext(), "ZenPlay queued fail!", Toast.LENGTH_SHORT).show();
+							}
+							updatePlaylist();
+						}
+					}, playlistItem.position, false, mActivity.getApplicationContext());
+					break;
+					
+				default:
+					break;
+				}
+				break;
+				
 			default:
 				return;
 		}

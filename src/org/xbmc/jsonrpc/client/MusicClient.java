@@ -1090,4 +1090,10 @@ public class MusicClient extends Client implements IMusicClient {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	public boolean playlistMoveZenPlay(INotifiableManager musicManager,
+			int from, boolean reset) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
