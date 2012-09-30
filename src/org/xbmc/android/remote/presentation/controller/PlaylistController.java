@@ -59,6 +59,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -153,6 +154,15 @@ public class PlaylistController extends ListController implements IController, C
 			mMusicManager.getPlaylist(new DataResponse<ArrayList<String>>() {
 	  	  		public void run() {
 	  	  			if (value.size() > 0) {
+	  	  				
+	  	  				// Store scroll position if playlist not empty
+	  	  				int top = 0;
+	  	  				final int firstVisibleItem = (mList.getCount() > 0)? mList.getFirstVisiblePosition() : -1;
+	  	  				if (firstVisibleItem >= 0) {
+	  	  					final View firstView = mList.getChildAt(0);
+	  	  					if (firstView != null) top = firstView.getTop();
+	  	  				}
+	  	  					  					
 		  	  			final ArrayList<PlaylistItem> items = new ArrayList<PlaylistItem>();
 		  	  			int i = 0;
 		  	  			for (String path : value) {
@@ -161,9 +171,14 @@ public class PlaylistController extends ListController implements IController, C
 						setTitle("Music playlist (" + (value.size() > MusicClient.PLAYLIST_LIMIT ? MusicClient.PLAYLIST_LIMIT + "+" : value.size()) + ")" );
 						mItemAdapter = new ItemAdapter(mPlaylistActivity, items);
 						mList.setAdapter(mItemAdapter);
-						if (mCurrentPosition >= 0) {
+						
+						//try to restore the scroll position
+						if (firstVisibleItem >= 0 && firstVisibleItem < items.size()) {
+							((ListView) mList).setSelectionFromTop(firstVisibleItem, top);
+						} else if (mCurrentPosition >= 0) {
 							mList.setSelection(mCurrentPosition);
 						}
+						
 					} else {
 						setTitle("Music playlist");
 						setNoDataMessage("No tracks in playlist.", R.drawable.icon_playlist_dark);
@@ -323,8 +338,6 @@ public class PlaylistController extends ListController implements IController, C
 			mCurrentPosition = newPos;
 			if (view != null) {
 				view.setCover(BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.icon_play));
-			} else {
-				mList.setSelection(newPos);
 			}
 		}
 	}
