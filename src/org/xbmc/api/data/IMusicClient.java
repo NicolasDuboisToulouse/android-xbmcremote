@@ -23,6 +23,8 @@ package org.xbmc.api.data;
 
 import java.util.ArrayList;
 
+import org.xbmc.api.business.DataResponse;
+import org.xbmc.api.business.IMusicManager;
 import org.xbmc.api.business.INotifiableManager;
 import org.xbmc.api.object.Album;
 import org.xbmc.api.object.Artist;
@@ -30,6 +32,7 @@ import org.xbmc.api.object.Genre;
 import org.xbmc.api.object.ICoverArt;
 import org.xbmc.api.object.Song;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 /**
@@ -107,6 +110,17 @@ public interface IMusicClient extends IClient {
 	 */
 	public boolean setPlaylistPosition(INotifiableManager manager, int position);
 	
+
+	/**
+	 * @see IMusicManager#playlistZenPlay(DataResponse, Song, boolean, Context)
+	 */
+	public boolean playlistZenPlay(INotifiableManager musicManager, final Song song, final boolean reset);
+
+	/**
+	 * @see IMusicManager#playlistMoveZenPlay(DataResponse, int, int, boolean, Context)
+	 */
+	public boolean playlistMoveZenPlay(INotifiableManager musicManager, final int from, final boolean reset);
+
 	/**
 	 * Removes media from the current playlist. It is not possible to remove the media if it is currently being played.
 	 * @param position Position to remove, starting with 0.
@@ -121,6 +135,22 @@ public interface IMusicClient extends IClient {
 	 */
 	public boolean removeFromPlaylist(INotifiableManager manager, String path);
 	
+	/**
+	 * Insert a song in the current playlist.
+	 * @param song Song to add
+	 * @param position Where to insert the song
+	 * @return True on success, false otherwise.
+	 */
+	public boolean playlistInsert(INotifiableManager manager, Song song, int position);
+	
+	/**
+	 * Move a song in the current playlist.
+	 * @param from initial position
+	 * @param to target position
+	 * @return True on success, false otherwise.
+	 */
+	public boolean playlistMove(INotifiableManager manager, int from, int to);
+
 	/**
 	 * Returns the first {@link PLAYLIST_LIMIT} songs of the playlist. 
 	 * @return Songs in the playlist.

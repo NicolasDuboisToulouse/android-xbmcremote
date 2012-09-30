@@ -63,7 +63,8 @@ public class SongListController extends ListController implements IController {
 	private static final int mThumbSize = ThumbSize.SMALL;
 	public static final int ITEM_CONTEXT_QUEUE = 1;
 	public static final int ITEM_CONTEXT_PLAY = 2;
-	public static final int ITEM_CONTEXT_INFO = 3;
+	public static final int ITEM_CONTEXT_ZENPLAY = 3;
+	public static final int ITEM_CONTEXT_ZENPLAY_QUEUED = 4;
 	
 	public static final int MENU_PLAY_ALL = 1;
 	public static final int MENU_SORT = 2;
@@ -174,6 +175,8 @@ public class SongListController extends ListController implements IController {
 		menu.setHeaderTitle(((Song)mList.getItemAtPosition(view.getPosition())).title);
 		menu.add(0, ITEM_CONTEXT_QUEUE, 1, "Queue Song");
 		menu.add(0, ITEM_CONTEXT_PLAY, 2, "Play Song");
+		menu.add(0, ITEM_CONTEXT_ZENPLAY, 3, "ZenPlay song");
+		menu.add(0, ITEM_CONTEXT_ZENPLAY_QUEUED, 4, "ZenPlay queued song");
 	}
 	
 	public void onContextItemSelected(MenuItem item) {
@@ -186,6 +189,19 @@ public class SongListController extends ListController implements IController {
 			case ITEM_CONTEXT_PLAY:
 				playSongAlbum(song);
 				break;
+				
+			case ITEM_CONTEXT_ZENPLAY:
+				mMusicManager.playlistZenPlay(new QueryResponse(mActivity,
+								"Song will played after the current one.",
+								"ZenPlay fail!"), song, true, mActivity.getApplicationContext());
+				break;
+				
+			case ITEM_CONTEXT_ZENPLAY_QUEUED:
+				mMusicManager.playlistZenPlay(new QueryResponse(mActivity,
+								"Song ZenPlay queued.",
+								"ZenPlay queued fail!"), song, false, mActivity.getApplicationContext());
+				break;
+
 			default:
 				return;
 		}

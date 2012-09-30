@@ -450,6 +450,38 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 	}
 	
 	/**
+	 * Insert a song in the current playlist.
+	 * @param response Response object
+	 * @param song Song to add
+	 * @param position Where to insert the song
+	 */
+	public void playlistInsert(final DataResponse<Boolean> response, final Song song, final int position, final Context context) {
+		mHandler.post(new Command<Boolean>(response, this) {
+			public void doRun() throws Exception{ 
+				response.value = music(context).playlistInsert(MusicManager.this, song, position);
+						
+			}
+		});		
+	}
+
+	/**
+	 * Move a song in the current playlist.
+	 * @param response Response object
+	 * @param from initial position
+	 * @param to target position
+	 * @param position Where to insert the song
+	 */
+	public void playlistMove(final DataResponse<Boolean> response, final int from, final int to, final Context context) {
+		mHandler.post(new Command<Boolean>(response, this) {
+			public void doRun() throws Exception{ 
+				response.value = music(context).playlistMove(MusicManager.this, from, to);
+						
+			}
+		});		
+	}
+
+	
+	/**
 	 * Plays an album
 	 * @param response Response object
 	 * @param album Album to play
@@ -593,6 +625,34 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 		});
 	}
 	
+
+	/**
+	 * @see IMusicManager#playlistZenPlay(DataResponse, Song, boolean, Context)
+	 */
+	public void playlistZenPlay(final DataResponse<Boolean> response, final Song song, final boolean reset, final Context context)
+	{
+		mHandler.post(new Command<Boolean>(response, this) {
+			public void doRun() throws Exception{ 
+				response.value = music(context).playlistZenPlay(MusicManager.this, song, reset);
+				checkForPlayAfterQueue(music(context), control(context), 0);
+			}
+		});
+	}
+	
+	/**
+	 * @see IMusicManager#playlistMoveZenPlay(DataResponse, int, int, boolean, Context)
+	 */
+	public void playlistMoveZenPlay(final DataResponse<Boolean> response, final int from, final boolean reset, final Context context)
+	{
+		mHandler.post(new Command<Boolean>(response, this) {
+			public void doRun() throws Exception{ 
+				response.value = music(context).playlistMoveZenPlay(MusicManager.this, from, reset);
+				checkForPlayAfterQueue(music(context), control(context), 0);
+			}
+		});		
+	}
+
+	
 	/**
 	 * Updates the album object with additional data from the albuminfo table
 	 * @param response Response object
@@ -640,7 +700,6 @@ public class MusicManager extends AbstractManager implements IMusicManager, ISor
 	}
 
 	public void onWrongConnectionState(int state) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub		
 	}
 }

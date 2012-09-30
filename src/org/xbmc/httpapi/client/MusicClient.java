@@ -24,10 +24,12 @@ package org.xbmc.httpapi.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.xbmc.api.business.DataResponse;
+import org.xbmc.api.business.IMusicManager;
 import org.xbmc.api.business.INotifiableManager;
 import org.xbmc.api.data.IControlClient;
-import org.xbmc.api.data.IMusicClient;
 import org.xbmc.api.data.IControlClient.ICurrentlyPlaying;
+import org.xbmc.api.data.IMusicClient;
 import org.xbmc.api.info.PlayStatus;
 import org.xbmc.api.object.Album;
 import org.xbmc.api.object.Artist;
@@ -39,6 +41,7 @@ import org.xbmc.api.type.MediaType;
 import org.xbmc.api.type.SortType;
 import org.xbmc.httpapi.Connection;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 /**
@@ -57,6 +60,8 @@ public class MusicClient extends Client implements IMusicClient {
 	public static final String LIBRARY_TYPE = "songs";
 	
 	public static final int PLAYLIST_LIMIT = 100;
+	
+	private int mPlaylistZenPlayPosition = 0;
 	
 	/**
 	 * Class constructor needs reference to HTTP client connection
@@ -118,9 +123,18 @@ public class MusicClient extends Client implements IMusicClient {
 	 * @return True on success, false otherwise.
 	 */
 	public boolean addToPlaylist(INotifiableManager manager, Song song) {
-		return mConnection.getBoolean(manager, "AddToPlayList", song.path + ";" + PLAYLIST_ID);
+		return addToPlaylist(manager, song.path);
 	}
-	
+
+	/**
+	 * Adds a song to the current playlist.
+	 * @param path Full path to song to add
+	 * @return True on success, false otherwise.
+	 */
+	public boolean addToPlaylist(INotifiableManager manager, String path) {
+		return mConnection.getBoolean(manager, "AddToPlayList", path + ";" + PLAYLIST_ID);
+	}
+
 	/**
 	 * Returns how many items are in the playlist.
 	 * @return Number of items in the playlist
@@ -146,6 +160,57 @@ public class MusicClient extends Client implements IMusicClient {
 		return mConnection.getBoolean(manager, "SetPlaylistSong", String.valueOf(position));
 	}
 	
+
+	/**
+	 * @see IMusicManager#playlistZenPlay(DataResponse, Song, boolean, Context)
+	 */
+	public boolean playlistZenPlay(INotifiableManager musicManager, final Song song, boolean reset)
+	{
+		// Update the ZenPlay pointer
+		int playlistPosition = getPlaylistPosition(musicManager);	
+		if (reset == true ||
+			mPlaylistZenPlayPosition <= playlistPosition ||
+			mPlaylistZenPlayPosition > getPlaylistSize(musicManager)) {
+			mPlaylistZenPlayPosition = playlistPosition + 1;
+		}
+		
+		// Insert the song
+		if (playlistInsert(musicManager, song, mPlaylistZenPlayPosition) == false) {
+			return false;
+		}
+		
+		// Set ZenPlay pointer after the inserted song
+		mPlaylistZenPlayPosition++;
+		
+		return true;
+	}
+
+	/**
+	 * @see IMusicManager#playlistMoveZenPlay(DataResponse, int, int, boolean, Context)
+	 * @see MusicClient#playlistMove(INotifiableManager, int, int)
+	 */
+	public boolean playlistMoveZenPlay(INotifiableManager musicManager,	int from, boolean reset) {
+		int playlistPosition = getPlaylistPosition(musicManager);
+		if (from <= playlistPosition) return false;  //We can't move a song before the played one. see playlistMove.
+
+		// Update the ZenPlay pointer
+		if (reset == true ||
+			mPlaylistZenPlayPosition <= playlistPosition ||
+			mPlaylistZenPlayPosition > getPlaylistSize(musicManager)) {
+			mPlaylistZenPlayPosition = playlistPosition + 1;
+		}
+		
+		// Move the song
+		if (playlistMove(musicManager, from, mPlaylistZenPlayPosition) == false) {
+			return false;
+		}
+		
+		// Set ZenPlay pointer after the moved song
+		mPlaylistZenPlayPosition++;
+		
+		return true;
+	}
+
 	/**
 	 * Removes media from the current playlist. It is not possible to remove the media if it is currently being played.
 	 * @param position Position to remove, starting with 0.
@@ -165,47 +230,88 @@ public class MusicClient extends Client implements IMusicClient {
 	}
 	
 	/**
+	 * Insert a song in the current playlist.
+	 * @see insertIntoPlaylist(INotifiableManager manager, String path, int position)
+	 * @param song Song to add
+	 * @param position Where to insert the song
+	 * @return True on success, false otherwise.
+	 */
+	public boolean playlistInsert(INotifiableManager manager, Song song, int position) {
+		return insertIntoPlaylist(manager, song.path, position);
+	}
+	
+	/**
+	 * Insert a song in the current playlist.
+	 * Since HTTP API don't allow insert, we have to remove all items from
+	 * the given position, add our song and add again all removed item.
+	 * Moreover, we can't remove the played item, so the position have to
+	 * be greater than the played item position.
+	 * @param song Song to add
+	 * @param position Where to insert the song
+	 * @return True on success, false otherwise.
+	 */
+	public boolean insertIntoPlaylist(INotifiableManager manager, String path, int position) {
+		if (getPlaylistPosition(manager) >= position) return false;
+
+		final ArrayList<String> content = getPlaylist(manager);
+		
+		for (int count = position; count < content.size(); count++) {
+			if (removeFromPlaylist(manager, position) == false) {
+				return false;
+			}
+		}
+		
+		if (addToPlaylist(manager, path) == false) {
+			return false;
+		}
+		
+		for (int current = position; current < content.size(); current++) {
+			if (addToPlaylist(manager, content.get(current)) == false) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * Move a song in the current playlist.
+	 * The implementation is a remove/insert.
+	 * HTTP API don't allow to remove the played song (from can't be the played song).
+	 * See also insertIntoPlaylist for other constraints.
+	 * @param from initial position
+	 * @param to target position
+	 * @return True on success, false otherwise.
+	 */
+	public boolean playlistMove(INotifiableManager manager, int from, int to) {
+		if (to == from) return true;
+		
+		int playPosition = getPlaylistPosition(manager);
+		if (from == playPosition) return false;
+		
+		final ArrayList<String> content = getPlaylist(manager);
+		if (from >= content.size()) return false;
+		final String path = content.get(from);
+		
+		if (removeFromPlaylist(manager, from) == false) return false;
+		
+		if (to > from) to--;  // We have removed from
+		
+		return insertIntoPlaylist(manager, path, to);
+	}
+		
+
+	/**
 	 * Returns the first {@link PLAYLIST_LIMIT} songs of the playlist. 
 	 * @return Songs in the playlist.
 	 */
 	public ArrayList<String> getPlaylist(INotifiableManager manager) {
-		return mConnection.getArray(manager, "GetPlaylistContents", PLAYLIST_ID);
-		
-		
-		/*
-		final ArrayList<String> nodes = mConnection.getArray("GetDirectory", "playlistmusic://");
-		final ArrayList<String> ids = new ArrayList<String>();
-		final int playlistPosition = getPlaylistPosition();
-		int i = 0;
-		for (String node : nodes) {
-			ids.add(node.substring(node.lastIndexOf('/') + 1, node.lastIndexOf('.')));
-			if (++i > PLAYLIST_LIMIT + playlistPosition) {
-				break;
-			}
+		ArrayList<String> list = mConnection.getArray(manager, "GetPlaylistContents", PLAYLIST_ID);
+		final String firstEntry = list.get(0);
+		if (firstEntry != null && firstEntry.equals("[Empty]")) {
+			list = new ArrayList<String>();
 		}
-		StringBuilder sql = new StringBuilder();
-		sql.append("idSong IN (");
-		int j = 0;
-		for (String id : ids) {
-			sql.append(id);
-			if (++j < i) {
-				sql.append(',');
-			}
-		}
-		sql.append(")");
-		final HashMap<Integer, Song> unsortedSongs = getSongsAsHashMap(sql);
-		final ArrayList<Song> sortedSongs = new ArrayList<Song>();
-		
-		for (String node : nodes) {
-			try {
-				final int id = Integer.parseInt(node.substring(node.lastIndexOf('/') + 1, node.lastIndexOf('.')));
-				sortedSongs.add(unsortedSongs.get(id));
-			} catch (NumberFormatException e) { 
-				Log.e(TAG, e.getMessage());
-				e.printStackTrace();
-			}
-		}
-		return sortedSongs;*/
+		return list;
 	}
 	
 	/**
@@ -213,6 +319,7 @@ public class MusicClient extends Client implements IMusicClient {
 	 * @return True on success, false otherwise.
 	 */
 	public boolean clearPlaylist(INotifiableManager manager) {
+		mPlaylistZenPlayPosition = 0;
 		return mConnection.getBoolean(manager, "ClearPlayList", PLAYLIST_ID);
 	}
 	

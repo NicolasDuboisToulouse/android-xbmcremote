@@ -191,6 +191,23 @@ public interface IMusicManager extends IManager {
 	public void removeFromPlaylist(final DataResponse<Boolean> response, final String path, final Context context);
 	
 	/**
+	 * Insert a song in the current playlist.
+	 * @param response Response object
+	 * @param song Song to add
+	 * @param position Where to insert the song
+	 */
+	public void playlistInsert(final DataResponse<Boolean> response, final Song song, final int position, final Context context);
+
+	/**
+	 * Move a song in the current playlist.
+	 * @param response Response object
+	 * @param from initial position
+	 * @param to target position
+	 * @param position Where to insert the song
+	 */
+	public void playlistMove(final DataResponse<Boolean> response, final int from, final int to, final Context context);
+
+	/**
 	 * Plays an album
 	 * @param response Response object
 	 * @param album Album to play
@@ -251,6 +268,30 @@ public interface IMusicManager extends IManager {
 	 * @param response Response object
 	 */
 	public void getPlaylistPosition(final DataResponse<Integer> response, final Context context);
+	
+	/**
+	 * "ZenPlay" a song.
+	 * The first time you use this function, the song is inserted after the currently playing song.
+	 * Next times, song are inserted after the last "ZenPlay" song.
+	 * The inserted position will never be before the currently playing song. That mean, if the last
+	 * "ZenPlay" song is before the currently playing song, the new one will be inserted just after it.
+	 * If reset is set to true, the song will be inserted just after the currently playing song (reset 
+	 * the "ZenPlay" position).
+	 * the current playing song.
+	 * @param response Response object
+	 * @param song Song to insert
+	 * @param reset Set to true to reset the current ZenPlay queue
+	 */
+	public void playlistZenPlay(final DataResponse<Boolean> response, final Song song, final boolean reset, final Context context);
+	
+	
+	/**
+	 * Move and "ZenPlay" a song.
+	 * Move a song in the playlist with the "ZenPlay" Functionality.
+	 * @see #playlistZenPlay(DataResponse, Song, boolean, Context)
+	 */
+	public void playlistMoveZenPlay(final DataResponse<Boolean> response, final int from, final boolean reset, final Context context);
+
 	
 	/**
 	 * Updates the album object with additional data from the albuminfo table

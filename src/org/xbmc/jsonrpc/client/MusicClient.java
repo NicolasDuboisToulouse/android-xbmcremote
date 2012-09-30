@@ -28,8 +28,8 @@ import java.util.Iterator;
 import org.codehaus.jackson.JsonNode;
 import org.xbmc.api.business.INotifiableManager;
 import org.xbmc.api.data.IControlClient;
-import org.xbmc.api.data.IMusicClient;
 import org.xbmc.api.data.IControlClient.ICurrentlyPlaying;
+import org.xbmc.api.data.IMusicClient;
 import org.xbmc.api.info.PlayStatus;
 import org.xbmc.api.object.Album;
 import org.xbmc.api.object.Artist;
@@ -1071,5 +1071,29 @@ public class MusicClient extends Client implements IMusicClient {
 				}
 			}
 		};
+	}
+
+	public boolean playlistInsert(INotifiableManager manager, Song song,
+			int position) {
+		// TODO Not yet implemented
+		return false;
+	}
+
+	public boolean playlistMove(INotifiableManager manager, int from, int to) {
+		// TODO Not yet implemented
+		return false;
+	}
+
+	public boolean playlistZenPlay(INotifiableManager musicManager,
+			Song song,
+			boolean reset) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public boolean playlistMoveZenPlay(INotifiableManager musicManager,
+			int from, boolean reset) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }
